@@ -1,11 +1,13 @@
 package com.capg.addressbookjdbc;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import com.capg.addressbook.Contact;
@@ -62,9 +64,11 @@ public class AddressBookDB {
 		return this.updatePersonsDataUsingStatement(name, phone);
 	}
 
+	@SuppressWarnings("static-access")
 	private int updatePersonsDataUsingStatement(String name, String phone) throws DatabaseException, SQLException {
 		String sql = "Update contact_table set phone = ? where firstname = ?";
 		int result = 0;
+		@SuppressWarnings("unused")
 		List<Contact> contactList = null;
 		if (this.contactStatement == null) {
 			Connection connection = this.getConnection();
@@ -107,6 +111,13 @@ public class AddressBookDB {
 			e.printStackTrace();
 		}
 		return contactList;
+	}
+
+	public List<Contact> getEmployeeForDateRange(LocalDate start, LocalDate end) throws DatabaseException {
+		String sql = String.format(
+				"select contact_table.contact_id, contact_table.fname,contact_table.lname,contact_table.address,contact_table.zip, contact_table.city, contact_table.state, contact_table.phone,contact_table.email,contact_table.date, addressBook.addName, addressBook.type from contact_table inner join addressBook on contact_table.contact_id = addressBook.contacts_id where date between '%s' and '%s'",
+				Date.valueOf(start), Date.valueOf(end));
+		return this.getContactData(sql);
 	}
 
 }
