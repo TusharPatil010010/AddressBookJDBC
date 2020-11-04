@@ -1,13 +1,13 @@
 package com.capg.addressbook;
 
 public class Contact {
-	private String firstName;
-	private String lastName;
-	private String address;
-	private String city;
-	private String state;
-	private long zip;
-	private long phoneNumber;
+	public String firstName;
+	public String lastName;
+	public String address;
+	public String city;
+	public String state;
+	public long zip;
+	public long phoneNumber;
 	private String email;
 
 	public Contact(String firstName, String lastName, String address, String city, String state, long zip,
