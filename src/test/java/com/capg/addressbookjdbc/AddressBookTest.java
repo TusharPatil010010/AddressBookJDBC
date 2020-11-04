@@ -22,6 +22,7 @@ public class AddressBookTest {
 	public void givenContactDataInDB_WhenRetrieved_ShouldMatchContactCount() throws DatabaseException {
 		AddressBookService addressBookService = new AddressBookService();
 		List<Contact> contactData = addressBookService.readContactData(IOService.DB_IO);
+		System.out.println(contactData.size());
 		assertEquals(4, contactData.size());
 	}
 
@@ -67,7 +68,24 @@ public class AddressBookTest {
 		AddressBookService addressBookService = new AddressBookService();
 		@SuppressWarnings("unused")
 		List<Contact> contactData = addressBookService.readContactData(IOService.DB_IO);
-		List<Contact> resultList = addressBookService.getContactForCityAndState("Akola", "Maharashta");
+		List<Contact> resultList = addressBookService.getContactForCityAndState("Ichalkaranji", "Maharashta");
 		assertEquals(2, resultList.size());
+	}
+
+	/**
+	 * UC20: Insert data into a database in a single transaction
+	 * 
+	 * @throws DatabaseException
+	 * @throws SQLException
+	 */
+	@Test
+	public void givenContactInDB_WhenAdded_ShouldBeAddedInSingleTransaction() throws DatabaseException, SQLException {
+		AddressBookService addressBookService = new AddressBookService();
+		@SuppressWarnings("unused")
+		List<Contact> contactData = addressBookService.readContactData(IOService.DB_IO);
+		addressBookService.addContactInDatabase("jeff", "Bezos", "ichalkaranji", "416115", "kolhapur", "Maharashtra",
+				"9874521036", "jeff@gmail.com", LocalDate.of(2020, 01, 02), "AddressBook1", "family");
+		boolean result = addressBookService.checkContactDataSync("Mark");
+		assertEquals(true, result);
 	}
 }

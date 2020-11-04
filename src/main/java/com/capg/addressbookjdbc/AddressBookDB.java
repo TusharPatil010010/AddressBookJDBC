@@ -41,6 +41,12 @@ public class AddressBookDB {
 
 	}
 
+	/**
+	 * UC16 : reads data from database
+	 * 
+	 * @return
+	 * @throws DatabaseException
+	 */
 	public List<Contact> readData() throws DatabaseException {
 		String sql = " select contact_table.contact_id, contact_table.firstname, contact_table.lastname, contact_table.address, contact_table.zip, "
 				+ "contact_table.city, contact_table.state, contact_table.phone, contact_table.email, addressBook.addName, addressBook.type "
@@ -60,6 +66,15 @@ public class AddressBookDB {
 		return contactList;
 	}
 
+	/**
+	 * UC17 : updates data in database
+	 * 
+	 * @param name
+	 * @param phone
+	 * @return
+	 * @throws DatabaseException
+	 * @throws SQLException
+	 */
 	public int updatePersonsData(String name, String phone) throws DatabaseException, SQLException {
 		return this.updatePersonsDataUsingStatement(name, phone);
 	}
@@ -113,6 +128,14 @@ public class AddressBookDB {
 		return contactList;
 	}
 
+	/**
+	 * UC18: retrieve data for given date range
+	 * 
+	 * @param start
+	 * @param end
+	 * @return
+	 * @throws DatabaseException
+	 */
 	public List<Contact> getEmployeeForDateRange(LocalDate start, LocalDate end) throws DatabaseException {
 		String sql = String.format(
 				"select contact_table.contact_id, contact_table.fname,contact_table.lname,contact_table.address,contact_table.zip, contact_table.city, contact_table.state, contact_table.phone,contact_table.email,contact_table.date, addressBook.addName, addressBook.type from contact_table inner join addressBook on contact_table.contact_id = addressBook.contacts_id where date between '%s' and '%s'",
@@ -120,10 +143,96 @@ public class AddressBookDB {
 		return this.getContactData(sql);
 	}
 
+	/**
+	 * UC19 : retrieve contact from DB by city or state
+	 * 
+	 * @param city
+	 * @param state
+	 * @return
+	 * @throws DatabaseException
+	 */
 	public List<Contact> getContactForCityAndState(String city, String state) throws DatabaseException {
 		String sql = String.format("select * from contact_table where city = 'Akola' order by fname,lname;", city,
 				state);
 		return this.getContactData(sql);
+	}
+
+	/**
+	 * UC20 : adds data to database
+	 * 
+	 * @param fname
+	 * @param lname
+	 * @param address
+	 * @param zip
+	 * @param city
+	 * @param state
+	 * @param phone
+	 * @param email
+	 * @param date
+	 * @param addName
+	 * @param type
+	 * @return
+	 * @throws DatabaseException
+	 * @throws SQLException
+	 */
+	public Contact addContact(String fname, String lname, String address, String zip, String city, String state,
+			String phone, String email, LocalDate date, String addName, String type)
+			throws DatabaseException, SQLException {
+		int contactId = -1;
+		Connection connection = null;
+		Contact contact = null;
+		try {
+			connection = this.getConnection();
+			connection.setAutoCommit(false);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		try (Statement statement = connection.createStatement()) {
+			String sql = String.format(
+					"INSERT INTO contact_table (fname, lname, address,zip,city,state,phone,email,date) "
+							+ "VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s')",
+					fname, lname, address, Long.parseLong(zip), city, state, Long.parseLong(phone), email, date);
+			@SuppressWarnings("static-access")
+			int rowAffected = statement.executeUpdate(sql, statement.RETURN_GENERATED_KEYS);
+			if (rowAffected == 1) {
+				ResultSet resultSet = statement.getGeneratedKeys();
+				if (resultSet.next())
+					contactId = resultSet.getInt(1);
+			}
+		} catch (SQLException e) {
+			try {
+				connection.rollback();
+			} catch (SQLException exception) {
+				exception.printStackTrace();
+			}
+			throw new DatabaseException("Unable to add new contact");
+		}
+		try (Statement statement = connection.createStatement()) {
+			String sql = String.format("INSERT INTO addressBook (contact_id,addName,type) " + "VALUES ('%s','%s','%s')",
+					contactId, addName, type);
+			int rowAffected = statement.executeUpdate(sql);
+			if (rowAffected == 1) {
+				contact = new Contact(fname, lname, address, city, state, Long.parseLong(zip), Long.parseLong(phone),
+						email);
+			}
+		} catch (SQLException e) {
+			try {
+				connection.rollback();
+			} catch (SQLException exception) {
+				exception.printStackTrace();
+			}
+			throw new DatabaseException("Unable to add addressBook details");
+		}
+		try {
+			connection.commit();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (connection != null) {
+				connection.close();
+			}
+		}
+		return contact;
 	}
 
 }

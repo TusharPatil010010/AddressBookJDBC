@@ -146,6 +146,13 @@ public class AddressBookService {
 		}
 	}
 
+	/**
+	 * UC16: reads the data from database
+	 * 
+	 * @param ioService
+	 * @return
+	 * @throws DatabaseException
+	 */
 	public List<Contact> readContactData(IOService ioService) throws DatabaseException {
 		if (ioService.equals(IOService.DB_IO)) {
 			this.contactList = addressBookDB.readData();
@@ -153,6 +160,14 @@ public class AddressBookService {
 		return this.contactList;
 	}
 
+	/**
+	 * UC17: updates the data in database
+	 * 
+	 * @param name
+	 * @param phone
+	 * @throws DatabaseException
+	 * @throws SQLException
+	 */
 	public void updatePersonsPhone(String name, String phone) throws DatabaseException, SQLException {
 		int result = addressBookDB.updatePersonsData(name, phone);
 		if (result == 0)
@@ -168,16 +183,63 @@ public class AddressBookService {
 		return contact;
 	}
 
+	/**
+	 * Checks if data is in sync
+	 * 
+	 * @param name
+	 * @return
+	 * @throws DatabaseException
+	 */
 	public boolean checkContactDataSync(String name) throws DatabaseException {
 		List<Contact> employeeList = addressBookDB.getContactFromData(name);
 		return employeeList.get(0).equals(getContact(name));
 	}
 
+	/**
+	 * UC18: retrieve data from a given data range
+	 * 
+	 * @param start
+	 * @param end
+	 * @return
+	 * @throws DatabaseException
+	 */
 	public List<Contact> getContactForDateRange(LocalDate start, LocalDate end) throws DatabaseException {
 		return addressBookDB.getEmployeeForDateRange(start, end);
 	}
 
+	/**
+	 * UC19: retrieve data by city or state
+	 * 
+	 * @param city
+	 * @param state
+	 * @return
+	 * @throws DatabaseException
+	 */
 	public List<Contact> getContactForCityAndState(String city, String state) throws DatabaseException {
 		return addressBookDB.getContactForCityAndState(city, state);
+	}
+
+	/**
+	 * UC20: adds a new contact in database
+	 * 
+	 * @param firstname
+	 * @param lastname
+	 * @param address
+	 * @param zip
+	 * @param city
+	 * @param state
+	 * @param phone
+	 * @param email
+	 * @param date
+	 * @param addName
+	 * @param type
+	 * @throws SQLException
+	 * @throws DatabaseException
+	 */
+	public void addContactInDatabase(String firstname, String lastname, String address, String zip, String city,
+			String state, String phone, String email, LocalDate date, String addName, String type)
+			throws SQLException, DatabaseException {
+		this.contactList.add(addressBookDB.addContact(firstname, lastname, address, zip, city, state, phone, email,
+				date, addName, type));
 	}
 }
