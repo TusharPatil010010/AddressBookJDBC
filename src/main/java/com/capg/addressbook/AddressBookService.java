@@ -172,8 +172,12 @@ public class AddressBookService {
 		List<Contact> employeeList = addressBookDB.getContactFromData(name);
 		return employeeList.get(0).equals(getContact(name));
 	}
-	
+
 	public List<Contact> getContactForDateRange(LocalDate start, LocalDate end) throws DatabaseException {
 		return addressBookDB.getEmployeeForDateRange(start, end);
+	}
+
+	public List<Contact> getContactForCityAndState(String city, String state) throws DatabaseException {
+		return addressBookDB.getContactForCityAndState(city, state);
 	}
 }

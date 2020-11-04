@@ -120,4 +120,10 @@ public class AddressBookDB {
 		return this.getContactData(sql);
 	}
 
+	public List<Contact> getContactForCityAndState(String city, String state) throws DatabaseException {
+		String sql = String.format("select * from contact_table where city = 'Akola' order by fname,lname;", city,
+				state);
+		return this.getContactData(sql);
+	}
+
 }

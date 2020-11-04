@@ -56,4 +56,18 @@ public class AddressBookTest {
 				LocalDate.of(2020, 01, 02));
 		assertEquals(1, resultList.size());
 	}
+
+	/**
+	 * UC19: retrieving data from table by state or city name
+	 * 
+	 * @throws DatabaseException
+	 */
+	@Test
+	public void givenContactInDB_WhenRetrievedForCityAndState_ShouldMatchContactCount() throws DatabaseException {
+		AddressBookService addressBookService = new AddressBookService();
+		@SuppressWarnings("unused")
+		List<Contact> contactData = addressBookService.readContactData(IOService.DB_IO);
+		List<Contact> resultList = addressBookService.getContactForCityAndState("Akola", "Maharashta");
+		assertEquals(2, resultList.size());
+	}
 }
