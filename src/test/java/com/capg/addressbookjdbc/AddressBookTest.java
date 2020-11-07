@@ -21,6 +21,7 @@ import com.google.gson.Gson;
 
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
 
 public class AddressBookTest {
 
@@ -108,9 +109,17 @@ public class AddressBookTest {
 
 	private Contact[] getContactList() {
 		Response response = RestAssured.get("/contact");
-		System.out.println("Employee payroll entries in JSONServer:\n" + response.asString());
+		System.out.println("Address book contact entries in JSONServer:\n" + response.asString());
 		Contact[] arrayOfContact = new Gson().fromJson(response.asString(), Contact[].class);
 		return arrayOfContact;
+	}
+
+	private Response addContactToJsonServer(Contact contact) {
+		String contactJson = new Gson().toJson(contact);
+		RequestSpecification request = RestAssured.given();
+		request.header("Content-Type", "application/json");
+		request.body(contactJson);
+		return request.post("/contact");
 	}
 
 	@Test
@@ -120,5 +129,35 @@ public class AddressBookTest {
 		long entries = addressBookService.countEntries(IOService.REST_IO);
 		assertEquals(1, entries);
 
+	}
+
+	@Test
+	public void givenListOfNewContacts_WhenAdded_ShouldMatch201ResponseAndCount() {
+		Contact[] arrayOfContact = getContactList();
+		AddressBookService addService = new AddressBookService(Arrays.asList(arrayOfContact));
+		Contact[] arrayOfCon = {
+				new Contact("Sachin", "Tenndulkar", "Ichalkaranji", "Kolhapur", "Maharashtra", 416115L, 9850273350L,
+						"sachin@gmail.com", LocalDate.of(2021, 01, 02), 2),
+				new Contact("Virat", "Kohli", "Ichalkaranji", "Kolhapur", "Maharashtra", 416115L, 9887483853L,
+						"virat@gmail.com", LocalDate.of(2021, 01, 02), 2) };
+		List<Contact> contactList = Arrays.asList(arrayOfCon);
+		contactList.forEach(contact -> {
+			Runnable task = () -> {
+				Response response = addContactToJsonServer(contact);
+				int statusCode = response.getStatusCode();
+				assertEquals(201, statusCode);
+				Contact newContact = new Gson().fromJson(response.asString(), Contact.class);
+				addService.addContactToAddressBook(newContact);
+			};
+			Thread thread = new Thread(task, contact.firstName);
+			thread.start();
+			try {
+				thread.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		});
+		long count = addService.countEntries(IOService.REST_IO);
+		assertEquals(3, count);
 	}
 }

@@ -297,4 +297,13 @@ public class AddressBookService {
 		}
 		return true;
 	}
+
+	/**
+	 * Usecase23 : Adding multiple contacts to json server
+	 * 
+	 * @param contact
+	 */
+	public void addContactToAddressBook(Contact contact) {
+		contactList.add(contact);
+	}
 }
