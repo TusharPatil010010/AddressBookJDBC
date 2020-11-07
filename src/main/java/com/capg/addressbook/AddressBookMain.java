@@ -153,7 +153,7 @@ public class AddressBookMain {
 	}
 
 	/**
-	 * UC13 Writing the data to file
+	 * Usecase13 Writing the data to file
 	 * 
 	 * @param ioService
 	 */
@@ -164,7 +164,7 @@ public class AddressBookMain {
 	}
 
 	/**
-	 * UC13 Reading the data from file
+	 * Usecase13 Reading the data from file
 	 * 
 	 * @param ioService
 	 */

@@ -63,7 +63,7 @@ public class AddressBookService {
 	}
 
 	/**
-	 * UC14 For Writing the data to CSV File
+	 * Usecase14 For Writing the data to CSV File
 	 * 
 	 * @param cityBookMap
 	 */
@@ -104,7 +104,7 @@ public class AddressBookService {
 	}
 
 	/**
-	 * UC15 using GSON writing data to JSON file
+	 * Usecase15 using GSON writing data to JSON file
 	 * 
 	 * @param cityBookMap
 	 * @throws IOException
@@ -127,7 +127,7 @@ public class AddressBookService {
 	}
 
 	/**
-	 * UC15 using GSON reading from a JSON file
+	 * Usecase15 using GSON reading from a JSON file
 	 */
 	public void readDataFromJSON() {
 		Gson gson = new Gson();
@@ -147,10 +147,8 @@ public class AddressBookService {
 	}
 
 	/**
-	 * UC16: reads the data from database
+	 * Usecase16: Retrieve data from the database
 	 * 
-	 * @param ioService
-	 * @return
 	 * @throws DatabaseException
 	 */
 	public List<Contact> readContactData(IOService ioService) throws DatabaseException {
@@ -161,58 +159,46 @@ public class AddressBookService {
 	}
 
 	/**
-	 * UC17: updates the data in database
+	 * Usecase17: Updating phone number of a persons in contact table
 	 * 
-	 * @param name
-	 * @param phone
 	 * @throws DatabaseException
 	 * @throws SQLException
 	 */
-	public void updatePersonsPhone(String name, String phone) throws DatabaseException, SQLException {
+	public void updatePersonsPhone(String name, long phone) throws DatabaseException, SQLException {
 		int result = addressBookDB.updatePersonsData(name, phone);
 		if (result == 0)
 			return;
 		Contact contact = this.getContact(name);
 		if (contact != null)
-			contact.phoneNumber = Long.parseLong(phone);
+			contact.phoneNumber = phone;
 	}
 
-	private Contact getContact(String fname) {
-		Contact contact = this.contactList.stream().filter(contactData -> contactData.firstName.equals(fname))
+	private Contact getContact(String name) {
+		String[] fullName = name.split(" ");
+		Contact contact = this.contactList.stream().filter(
+				contactData -> contactData.firstName.equals(fullName[0]) && contactData.lastName.equals(fullName[1]))
 				.findFirst().orElse(null);
 		return contact;
 	}
 
-	/**
-	 * Checks if data is in sync
-	 * 
-	 * @param name
-	 * @return
-	 * @throws DatabaseException
-	 */
 	public boolean checkContactDataSync(String name) throws DatabaseException {
 		List<Contact> employeeList = addressBookDB.getContactFromData(name);
 		return employeeList.get(0).equals(getContact(name));
+
 	}
 
 	/**
-	 * UC18: retrieve data from a given data range
+	 * Usecase18: retrieving data from the table between data range
 	 * 
-	 * @param start
-	 * @param end
-	 * @return
 	 * @throws DatabaseException
 	 */
 	public List<Contact> getContactForDateRange(LocalDate start, LocalDate end) throws DatabaseException {
-		return addressBookDB.getEmployeeForDateRange(start, end);
+		return addressBookDB.getContactForDateRange(start, end);
 	}
 
 	/**
-	 * UC19: retrieve data by city or state
+	 * Usecase19: retrieving data from the table for city and state
 	 * 
-	 * @param city
-	 * @param state
-	 * @return
 	 * @throws DatabaseException
 	 */
 	public List<Contact> getContactForCityAndState(String city, String state) throws DatabaseException {
@@ -220,26 +206,100 @@ public class AddressBookService {
 	}
 
 	/**
-	 * UC20: adds a new contact in database
+	 * Usecase20: Insert data into database in a single transaction
 	 * 
-	 * @param firstname
-	 * @param lastname
-	 * @param address
-	 * @param zip
-	 * @param city
-	 * @param state
-	 * @param phone
-	 * @param email
-	 * @param date
-	 * @param addName
-	 * @param type
-	 * @throws SQLException
 	 * @throws DatabaseException
+	 * @throws SQLException
 	 */
-	public void addContactInDatabase(String firstname, String lastname, String address, String zip, String city,
-			String state, String phone, String email, LocalDate date, String addName, String type)
+	public void addContactInDatabase(String fname, String lname, String address, long zip, String city, String state,
+			long phone, String email, LocalDate date, int addId, String addName, String type)
 			throws SQLException, DatabaseException {
-		this.contactList.add(addressBookDB.addContact(firstname, lastname, address, zip, city, state, phone, email,
-				date, addName, type));
+		this.contactList.add(addressBookDB.addContact(fname, lname, address, zip, city, state, phone, email, date,
+				addId, addName, type));
+	}
+
+	/**
+	 * Usecase21 : Adding multiple contacts in the table using multi threading
+	 * 
+	 * @param contactList
+	 */
+	public void addContactToDB(List<Contact> contactList) {
+		contactList.forEach(contact -> {
+			Runnable task = () -> {
+				System.out.println("Contact Being Added: " + Thread.currentThread().getName());
+				try {
+					this.addContactDB(contact.firstName, contact.lastName, contact.address, contact.zip, contact.city,
+							contact.state, contact.phoneNumber, contact.email, contact.date, contact.addId,
+							contact.addName, contact.type);
+				} catch (SQLException | DatabaseException e) {
+					e.printStackTrace();
+				}
+				System.out.println("Contact Added: " + Thread.currentThread().getName());
+			};
+			Thread thread = new Thread(task, contact.firstName);
+			thread.start();
+			try {
+				thread.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		});
+	}
+
+	private void addContactDB(String fname, String lname, String address, long zip, String city, String state,
+			long phone, String email, LocalDate date, int addId, String addName, String type)
+			throws DatabaseException, SQLException, DatabaseException {
+		this.contactList.add(addressBookDB.addContact(fname, lname, address, zip, city, state, phone, email, date,
+				addId, addName, type));
+	}
+
+	public long countEntries(IOService ioService) {
+		int result = 0;
+		if (ioService.equals(IOService.DB_IO)) {
+			result = contactList.size();
+		}
+		return result;
+	}
+
+	/**
+	 * Usecase21: Updating the table data using the multi threading
+	 * 
+	 * @param contactMap
+	 */
+	public void updatePhoneNumber(Map<String, Long> contactMap) {
+		contactMap.forEach((k, v) -> {
+			Runnable task = () -> {
+				System.out.println("Contact Being Added: " + Thread.currentThread().getName());
+				try {
+					this.updatePersonsPhone(k, v);
+				} catch (SQLException | DatabaseException e) {
+					e.printStackTrace();
+				}
+				System.out.println("Contact Added: " + Thread.currentThread().getName());
+			};
+			Thread thread = new Thread(task, k);
+			thread.start();
+			try {
+				thread.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		});
+	}
+
+	public boolean checkContactInSyncWithDB(List<String> nameList) throws DatabaseException {
+		List<Boolean> resultList = new ArrayList<>();
+		nameList.forEach(name -> {
+			List<Contact> employeeList;
+			try {
+				employeeList = addressBookDB.getContactFromData(name);
+				resultList.add(employeeList.get(0).equals(getContact(name)));
+			} catch (DatabaseException e) {
+			}
+		});
+		if (resultList.contains(false)) {
+			return false;
+		}
+		return true;
 	}
 }

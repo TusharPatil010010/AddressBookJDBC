@@ -1,5 +1,8 @@
 package com.capg.addressbook;
 
+import java.time.LocalDate;
+import java.util.Objects;
+
 public class Contact {
 	public String firstName;
 	public String lastName;
@@ -8,7 +11,11 @@ public class Contact {
 	public String state;
 	public long zip;
 	public long phoneNumber;
-	private String email;
+	public String email;
+	public int addId;
+	public String addName;
+	public LocalDate date;
+	public String type;
 
 	public Contact(String firstName, String lastName, String address, String city, String state, long zip,
 			long phoneNumber, String email) {
@@ -20,6 +27,27 @@ public class Contact {
 		this.zip = zip;
 		this.phoneNumber = phoneNumber;
 		this.email = email;
+	}
+
+	public Contact(String firstName, String lastName, String address, String city, String state, long zip,
+			long phoneNumber, String email, LocalDate date, int addressBookId, String addName, String type) {
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.address = address;
+		this.city = city;
+		this.state = state;
+		this.zip = zip;
+		this.phoneNumber = phoneNumber;
+		this.email = email;
+		this.date = date;
+		this.addId = addressBookId;
+		this.addName = addName;
+		this.type = type;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(firstName, lastName, address, phoneNumber);
 	}
 
 	@Override

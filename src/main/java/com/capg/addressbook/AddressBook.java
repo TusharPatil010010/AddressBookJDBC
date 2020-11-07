@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
 public class AddressBook {
 	Scanner sc = new Scanner(System.in);
 	public List<Contact> contactList = new ArrayList<Contact>();
@@ -85,5 +89,4 @@ public class AddressBook {
 					+ " Phone Number : " + c.getPhoneNumber() + " Email ID : " + c.getEmail() + "\n");
 		}
 	}
-
 }
