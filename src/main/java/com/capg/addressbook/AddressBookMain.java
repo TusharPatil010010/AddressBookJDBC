@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import com.capg.addressbook.AddressBookService.IOService;
 
 public class AddressBookMain {
-
 	public static Map<String, AddressBook> cityBookMap;
 	public static Map<String, Map<String, AddressBook>> stateBookMap;
 	static Scanner scanner = new Scanner(System.in);
@@ -155,8 +154,9 @@ public class AddressBookMain {
 	 * Usecase13 Writing the data to file
 	 * 
 	 * @param ioService
+	 * @throws AddressBookException
 	 */
-	public void writeData(IOService ioService) {
+	public void writeData(IOService ioService) throws AddressBookException {
 		if (ioService.equals(IOService.FILE_IO)) {
 			new AddressBookService().writeData(cityBookMap);
 		}
@@ -166,15 +166,16 @@ public class AddressBookMain {
 	 * Usecase13 Reading the data from file
 	 * 
 	 * @param ioService
+	 * @throws AddressBookException
 	 */
-	public void readData(IOService ioService) {
+	public void readData(IOService ioService) throws AddressBookException {
 		if (ioService.equals(IOService.FILE_IO)) {
 			new AddressBookService().readData();
 		}
 	}
 
 	@SuppressWarnings("resource")
-	public static void main(String[] args) {
+	public static void main(String[] args) throws AddressBookException {
 		Scanner scanner = new Scanner(System.in);
 		AddressBookMain addBookMain = new AddressBookMain();
 		int v;

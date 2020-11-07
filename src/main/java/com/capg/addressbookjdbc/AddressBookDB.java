@@ -43,7 +43,7 @@ public class AddressBookDB {
 	}
 
 	/**
-	 * Usecase16: Retrieve data from the database Refactored the query according to
+	 * UC16: Retrieve data from the database Refactored the query according to
 	 * new table structure
 	 * 
 	 * @throws DatabaseException
@@ -61,13 +61,12 @@ public class AddressBookDB {
 			contactList = this.getContactData(resultSet);
 			return contactList;
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new DatabaseException("Unable to retrieve data");
 		}
-		return contactList;
 	}
 
 	/**
-	 * Usecase17: Updating phone number of a persons in contact table
+	 * UC17: Updating phone number of a persons in contact table
 	 * 
 	 * @throws DatabaseException
 	 * @throws SQLException
@@ -88,7 +87,7 @@ public class AddressBookDB {
 			contactStatement.setString(2, name);
 			result = contactStatement.executeUpdate();
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw new DatabaseException("Unable to execute the update query on contact_table");
 		}
 		return result;
 	}
@@ -117,13 +116,13 @@ public class AddressBookDB {
 			ResultSet resultSet = statement.executeQuery(sql);
 			contactList = this.getContactData(resultSet);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new DatabaseException("Unable to retrieve data from the contact_table");
 		}
 		return contactList;
 	}
 
 	/**
-	 * Usecase18: retrieving data between the data range Refactored the query
+	 * UC18: retrieving data between the data range Refactored the query
 	 * according to new table structure
 	 * 
 	 * @param start
@@ -140,7 +139,7 @@ public class AddressBookDB {
 	}
 
 	/**
-	 * Usecase19: Retrieving data for the city and state
+	 * UC19: Retrieving data for the city and state
 	 * 
 	 * @param city
 	 * @param state
@@ -154,7 +153,7 @@ public class AddressBookDB {
 	}
 
 	/**
-	 * Usecase20: Inserting data into the tables in a single transaction Refactored
+	 * UC20: Inserting data into the tables in a single transaction Refactored
 	 * the query according to new table structure
 	 * 
 	 * @param fname
@@ -169,7 +168,7 @@ public class AddressBookDB {
 	 * @param addName
 	 * @param type
 	 * @return
-	 * @throws DatabaseException
+	 * @throws com.capgemini.addressbookdb.DatabaseException
 	 * @throws SQLException
 	 */
 	public Contact addContact(String fname, String lname, String address, long zip, String city, String state,
@@ -181,7 +180,7 @@ public class AddressBookDB {
 			connection = this.getConnection();
 			connection.setAutoCommit(false);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new DatabaseException("Unable to establish connection with database");
 		}
 		try (Statement statement = connection.createStatement()) {
 			String sql = String.format(

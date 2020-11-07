@@ -44,7 +44,7 @@ public class AddressBookService {
 		this.contactList = new ArrayList<>(list);
 	}
 
-	public void writeData(Map<String, AddressBook> cityBookMap) {
+	public void writeData(Map<String, AddressBook> cityBookMap) throws AddressBookException {
 		StringBuffer employeeBuffer = new StringBuffer();
 		for (Map.Entry<String, AddressBook> entry : cityBookMap.entrySet()) {
 			entry.getValue().getContactList().forEach(contact -> {
@@ -55,24 +55,25 @@ public class AddressBookService {
 		try {
 			Files.write(Paths.get(FILE_NAME), employeeBuffer.toString().getBytes());
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new AddressBookException("Unable to write data to the text file");
 		}
 	}
 
-	public void readData() {
+	public void readData() throws AddressBookException {
 		try {
 			Files.lines(new File(FILE_NAME).toPath()).forEach(System.out::println);
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new AddressBookException("Unable to read data from the text file");
 		}
 	}
 
 	/**
-	 * Usecase14 For Writing the data to CSV File
+	 * UC14 For Writing the data to CSV File
 	 * 
 	 * @param cityBookMap
+	 * @throws AddressBookException
 	 */
-	public void writeDataToCSV(Map<String, AddressBook> cityBookMap) {
+	public void writeDataToCSV(Map<String, AddressBook> cityBookMap) throws AddressBookException {
 		Path path = Paths.get(CSV_FILE);
 		try {
 			FileWriter outputfile = new FileWriter(path.toFile());
@@ -85,14 +86,16 @@ public class AddressBookService {
 			}
 			writer.close();
 		} catch (IOException exception) {
-			exception.printStackTrace();
+			throw new AddressBookException("Unable to write data to the csv file");
 		}
 	}
 
 	/**
 	 * Reading data from the CSV file
+	 * 
+	 * @throws AddressBookException
 	 */
-	public void readDataFromCSV() {
+	public void readDataFromCSV() throws AddressBookException {
 		try {
 			Reader fileReader = Files.newBufferedReader(Paths.get(CSV_FILE));
 			@SuppressWarnings("resource")
@@ -104,12 +107,12 @@ public class AddressBookService {
 						+ " Email: " + data[7]);
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new AddressBookException("Unable to read data from the csv file");
 		}
 	}
 
 	/**
-	 * Usecase15 using GSON writing data to JSON file
+	 * UC15 using GSON writing data to JSON file
 	 * 
 	 * @param cityBookMap
 	 * @throws IOException
@@ -124,7 +127,7 @@ public class AddressBookService {
 				try {
 					writer.write(json);
 				} catch (IOException e) {
-					e.printStackTrace();
+					System.out.println(e);
 				}
 			});
 		}
@@ -132,9 +135,11 @@ public class AddressBookService {
 	}
 
 	/**
-	 * Usecase15 using GSON reading from a JSON file
+	 * UC15 using GSON reading from a JSON file
+	 * 
+	 * @throws AddressBookException
 	 */
-	public void readDataFromJSON() {
+	public void readDataFromJSON() throws AddressBookException {
 		Gson gson = new Gson();
 		try {
 			BufferedReader bufferedReader = new BufferedReader(new FileReader(Paths.get(JSON_FILE).toFile()));
@@ -147,12 +152,12 @@ public class AddressBookService {
 				}
 			}
 		} catch (Exception exception) {
-			exception.printStackTrace();
+			throw new AddressBookException("Unable to read data from the json file");
 		}
 	}
 
 	/**
-	 * Usecase16: Retrieve data from the database
+	 * UC16: Retrieve data from the database
 	 * 
 	 * @throws DatabaseException
 	 */
@@ -164,7 +169,7 @@ public class AddressBookService {
 	}
 
 	/**
-	 * Usecase17: Updating phone number of a persons in contact table
+	 * UC17: Updating phone number of a persons in contact table
 	 * 
 	 * @throws DatabaseException
 	 * @throws SQLException
@@ -194,7 +199,7 @@ public class AddressBookService {
 	}
 
 	/**
-	 * Usecase18: retrieving data from the table between data range
+	 * UC18: retrieving data from the table between data range
 	 * 
 	 * @throws DatabaseException
 	 */
@@ -203,7 +208,7 @@ public class AddressBookService {
 	}
 
 	/**
-	 * Usecase19: retrieving data from the table for city and state
+	 * UC19: retrieving data from the table for city and state
 	 * 
 	 * @throws DatabaseException
 	 */
@@ -212,7 +217,7 @@ public class AddressBookService {
 	}
 
 	/**
-	 * Usecase20: Insert data into database in a single transaction
+	 * UC20: Insert data into database in a single transaction
 	 * 
 	 * @throws DatabaseException
 	 * @throws SQLException
@@ -224,7 +229,7 @@ public class AddressBookService {
 	}
 
 	/**
-	 * Usecase21 : Adding multiple contacts in the table using multi threading
+	 * UC21 : Adding multiple contacts in the table using multi threading
 	 * 
 	 * @param contactList
 	 */
@@ -245,7 +250,7 @@ public class AddressBookService {
 			try {
 				thread.join();
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				System.out.println(Thread.currentThread().getName() + " is interrupted");
 			}
 		});
 	}
@@ -261,7 +266,7 @@ public class AddressBookService {
 	}
 
 	/**
-	 * Usecase21: Updating the table data using the multi threading
+	 * UC21: Updating the table data using the multi threading
 	 * 
 	 * @param contactMap
 	 */
@@ -286,7 +291,7 @@ public class AddressBookService {
 		});
 	}
 
-	public boolean checkContactInSyncWithDB(List<String> nameList) throws DatabaseException {
+	public boolean checkContactInSyncWithDB(List<String> nameList) {
 		List<Boolean> resultList = new ArrayList<>();
 		nameList.forEach(name -> {
 			List<Contact> employeeList;
@@ -294,6 +299,7 @@ public class AddressBookService {
 				employeeList = addressBookDB.getContactFromData(name);
 				resultList.add(employeeList.get(0).equals(getContact(name)));
 			} catch (DatabaseException e) {
+				System.out.println("Unable to retrieve the data for " + name + " in database");
 			}
 		});
 		if (resultList.contains(false)) {
@@ -303,7 +309,7 @@ public class AddressBookService {
 	}
 
 	/**
-	 * Usecase23 : Adding multiple contacts to json server
+	 * UC23 : Adding multiple contacts to JSON Server
 	 * 
 	 * @param contact
 	 */
@@ -312,9 +318,10 @@ public class AddressBookService {
 	}
 
 	/**
-	 * Usecase25 : Delete contact from json server
+	 * UC25 : delete contact from JSON Server
 	 * 
-	 * @param contact
+	 * @param firstName
+	 * @param ioService
 	 */
 	public void deleteContactFromAddressBook(String firstName, IOService ioService) {
 		if (ioService.equals(IOService.REST_IO)) {
