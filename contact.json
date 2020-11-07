@@ -1,22 +1,22 @@
 {
-"contact": [
-        {  
-        "id" : 1,
+  "contact": [
+    {
+      "id": 1,
       "fname": "Mukesh",
-      "lname":"Ambani",
+      "lname": "Ambani",
       "address": "Ichalkaranji",
       "zip": 416115,
       "city": "Kolhapur",
-      "state":"Maharashtra",
-      "phone":9856743210,
-      "email":"mukesh@gmail.com",
+      "state": "Maharashtra",
+      "phone": 9856743210,
+      "email": "mukesh@gmail.com",
       "start": {
         "year": 2021,
         "month": 1,
         "day": 2
-            }
-        },
-     {
+      }
+    },
+    {
       "firstName": "Sachin",
       "lastName": "Tendulkar",
       "address": "Ichalkaranji",
@@ -49,6 +49,40 @@
         "day": 2
       },
       "id": 3
+    },
+    {
+      "firstName": "Sachin",
+      "lastName": "Tenndulkar",
+      "address": "Ichalkaranji",
+      "city": "Kolhapur",
+      "state": "Maharashtra",
+      "zip": 416115,
+      "phoneNumber": 9850273350,
+      "email": "sachin@gmail.com",
+      "addId": 2,
+      "date": {
+        "year": 2021,
+        "month": 1,
+        "day": 2
+      },
+      "id": 4
+    },
+    {
+      "firstName": "Virat",
+      "lastName": "Kohli",
+      "address": "Ichalkaranji",
+      "city": "Kolhapur",
+      "state": "Maharashtra",
+      "zip": 416115,
+      "phoneNumber": 9887483853,
+      "email": "virat@gmail.com",
+      "addId": 2,
+      "date": {
+        "year": 2021,
+        "month": 1,
+        "day": 2
+      },
+      "id": 5
     }
   ]
 }

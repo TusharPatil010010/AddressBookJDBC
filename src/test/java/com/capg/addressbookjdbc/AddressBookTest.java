@@ -36,9 +36,9 @@ public class AddressBookTest {
 	public void givenNewDataForContact_WhenUpdated_ShouldBeInSync() throws DatabaseException, SQLException {
 		AddressBookService addressBookService = new AddressBookService();
 		addressBookService.readContactData(IOService.DB_IO);
-		addressBookService.updatePersonsPhone("Tushar Patil", 9876543210L);
+		addressBookService.updatePersonsPhone("Tushar Patil", 9876543210L, IOService.DB_IO);
 		addressBookService.readContactData(IOService.DB_IO);
-		boolean result = addressBookService.checkContactDataSync("Aditya Kharade");
+		boolean result = addressBookService.checkContactDataSync("Tushar Patil");
 		assertEquals(true, result);
 	}
 
@@ -70,7 +70,7 @@ public class AddressBookTest {
 	}
 
 	@Test
-	public void geiven2Contacts_WhenAddedToDB_ShouldMatchContactEntries() throws DatabaseException {
+	public void geivenTwoContacts_WhenAddedToDB_ShouldMatchContactEntries() throws DatabaseException {
 		Contact[] contactArray = {
 				new Contact("Jeff", "Bezos", "Ichalkaranji", "Kolhapur", "Maharashtra", 416115L, 9850273350L,
 						"jeff@gmail.com", LocalDate.of(2021, 01, 02), 2),
@@ -87,7 +87,7 @@ public class AddressBookTest {
 	}
 
 	@Test
-	public void geiven2Persons_WhenUpdatedPhoneNumer_ShouldSyncWithDB() throws DatabaseException {
+	public void geivenTwoPersons_WhenUpdatedPhoneNumer_ShouldSyncWithDB() throws DatabaseException {
 		Map<String, Long> contactMap = new HashMap<>();
 		contactMap.put("Jeff Bezos", 9788996633L);
 		contactMap.put("Elon Musk", 9455776699L);
@@ -159,5 +159,20 @@ public class AddressBookTest {
 		});
 		long count = addService.countEntries(IOService.REST_IO);
 		assertEquals(3, count);
+	}
+
+	@Test
+	public void givenNewPhoneForContact_WhenUpdated_ShouldMatchRequest() throws DatabaseException, SQLException {
+		Contact[] arrayOfContact = getContactList();
+		AddressBookService addService = new AddressBookService(Arrays.asList(arrayOfContact));
+		addService.updatePersonsPhone("Sachin", 8877442233L, IOService.REST_IO);
+		Contact contact = addService.getContact("Sachin");
+		String contactJson = new Gson().toJson(contact);
+		RequestSpecification request = RestAssured.given();
+		request.header("Content-Type", "application/json");
+		request.body(contactJson);
+		Response response = request.put("/contact/" + contact.id);
+		int statusCode = response.getStatusCode();
+		assertEquals(200, statusCode);
 	}
 }

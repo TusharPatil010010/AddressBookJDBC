@@ -13,17 +13,6 @@ import java.util.List;
 
 import com.capg.addressbook.Contact;
 
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-
 public class AddressBookDB {
 	private static PreparedStatement contactStatement;
 	private static AddressBookDB addressBookDB;
@@ -41,7 +30,7 @@ public class AddressBookDB {
 	private Connection getConnection() throws DatabaseException {
 		String jdbcURL = "jdbc:mysql://localhost:3306/addressBookService?useSSL=false";
 		String userName = "root";
-		String password = "Jan1998ad";
+		String password = "open";
 		Connection connection = null;
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
