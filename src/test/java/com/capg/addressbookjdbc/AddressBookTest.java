@@ -175,4 +175,20 @@ public class AddressBookTest {
 		int statusCode = response.getStatusCode();
 		assertEquals(200, statusCode);
 	}
+
+	@Test
+	public void givenContactToDelete_WhenDeleted_ShouldMatch200ResponseAndCount()
+			throws DatabaseException, SQLException {
+		Contact[] arrayOfContact = getContactList();
+		AddressBookService addService = new AddressBookService(Arrays.asList(arrayOfContact));
+		Contact contact = addService.getContact("Virat");
+		RequestSpecification request = RestAssured.given();
+		request.header("Content-Type", "application/json");
+		Response response = request.delete("/contact/" + contact.id);
+		int statusCode = response.getStatusCode();
+		assertEquals(200, statusCode);
+		addService.deleteContactFromAddressBook(contact.firstName, IOService.REST_IO);
+		long count = addService.countEntries(IOService.REST_IO);
+		assertEquals(1, count);
+	}
 }

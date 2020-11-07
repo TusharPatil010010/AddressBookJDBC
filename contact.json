@@ -66,23 +66,6 @@
         "day": 2
       },
       "id": 4
-    },
-    {
-      "firstName": "Virat",
-      "lastName": "Kohli",
-      "address": "Ichalkaranji",
-      "city": "Kolhapur",
-      "state": "Maharashtra",
-      "zip": 416115,
-      "phoneNumber": 9887483853,
-      "email": "virat@gmail.com",
-      "addId": 2,
-      "date": {
-        "year": 2021,
-        "month": 1,
-        "day": 2
-      },
-      "id": 5
     }
   ]
 }
