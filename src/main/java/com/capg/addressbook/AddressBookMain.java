@@ -4,10 +4,9 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.capg.addressbook.AddressBookService.IOService;
+
 public class AddressBookMain {
-	public enum IOService {
-		CONSOLE_IO, FILE_IO, DB_IO, REST_IO
-	};
 
 	public static Map<String, AddressBook> cityBookMap;
 	public static Map<String, Map<String, AddressBook>> stateBookMap;

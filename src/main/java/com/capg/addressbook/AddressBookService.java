@@ -39,6 +39,10 @@ public class AddressBookService {
 		addressBookDB = AddressBookDB.getInstance();
 	}
 
+	public AddressBookService(List<Contact> list) {
+		this.contactList = new ArrayList<>(list);
+	}
+
 	public void writeData(Map<String, AddressBook> cityBookMap) {
 		StringBuffer employeeBuffer = new StringBuffer();
 		for (Map.Entry<String, AddressBook> entry : cityBookMap.entrySet()) {
@@ -174,9 +178,7 @@ public class AddressBookService {
 	}
 
 	private Contact getContact(String name) {
-		String[] fullName = name.split(" ");
-		Contact contact = this.contactList.stream().filter(
-				contactData -> contactData.firstName.equals(fullName[0]) && contactData.lastName.equals(fullName[1]))
+		Contact contact = this.contactList.stream().filter(contactData -> contactData.firstName.equals(name))
 				.findFirst().orElse(null);
 		return contact;
 	}
@@ -212,10 +214,9 @@ public class AddressBookService {
 	 * @throws SQLException
 	 */
 	public void addContactInDatabase(String fname, String lname, String address, long zip, String city, String state,
-			long phone, String email, LocalDate date, int addId, String addName, String type)
-			throws SQLException, DatabaseException {
-		this.contactList.add(addressBookDB.addContact(fname, lname, address, zip, city, state, phone, email, date,
-				addId, addName, type));
+			long phone, String email, LocalDate date, int addId) throws SQLException, DatabaseException {
+		this.contactList
+				.add(addressBookDB.addContact(fname, lname, address, zip, city, state, phone, email, date, addId));
 	}
 
 	/**
@@ -229,8 +230,7 @@ public class AddressBookService {
 				System.out.println("Contact Being Added: " + Thread.currentThread().getName());
 				try {
 					this.addContactDB(contact.firstName, contact.lastName, contact.address, contact.zip, contact.city,
-							contact.state, contact.phoneNumber, contact.email, contact.date, contact.addId,
-							contact.addName, contact.type);
+							contact.state, contact.phoneNumber, contact.email, contact.date, contact.addId);
 				} catch (SQLException | DatabaseException e) {
 					e.printStackTrace();
 				}
@@ -247,18 +247,13 @@ public class AddressBookService {
 	}
 
 	private void addContactDB(String fname, String lname, String address, long zip, String city, String state,
-			long phone, String email, LocalDate date, int addId, String addName, String type)
-			throws DatabaseException, SQLException, DatabaseException {
-		this.contactList.add(addressBookDB.addContact(fname, lname, address, zip, city, state, phone, email, date,
-				addId, addName, type));
+			long phone, String email, LocalDate date, int addId) throws DatabaseException, SQLException {
+		this.contactList
+				.add(addressBookDB.addContact(fname, lname, address, zip, city, state, phone, email, date, addId));
 	}
 
 	public long countEntries(IOService ioService) {
-		int result = 0;
-		if (ioService.equals(IOService.DB_IO)) {
-			result = contactList.size();
-		}
-		return result;
+		return contactList.size();
 	}
 
 	/**

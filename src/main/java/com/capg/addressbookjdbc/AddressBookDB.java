@@ -13,6 +13,17 @@ import java.util.List;
 
 import com.capg.addressbook.Contact;
 
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
 public class AddressBookDB {
 	private static PreparedStatement contactStatement;
 	private static AddressBookDB addressBookDB;
@@ -43,14 +54,13 @@ public class AddressBookDB {
 	}
 
 	/**
-	 * Usecase16: Retrieve data from the database
+	 * Usecase16: Retrieve data from the database Refactored the query according to
+	 * new table structure
 	 * 
 	 * @throws DatabaseException
 	 */
 	public List<Contact> readData() throws DatabaseException {
-		String sql = " select contact_table.contact_id, contact_table.fname,contact_table.lname,contact_table.address,contact_table.zip, "
-				+ "contact_table.city, contact_table.state, contact_table.phone,contact_table.email,addressBook.addName, addressBook.type "
-				+ "from contact_table inner join addressBook on contact_table.contact_id = addressBook.contact_id; ";
+		String sql = "select * from contact_table inner join addressbookjoin using (contact_id) inner join addressbook using(add_id);";
 		return this.getContactData(sql);
 	}
 
@@ -78,8 +88,7 @@ public class AddressBookDB {
 	}
 
 	private int updatePersonsDataUsingStatement(String name, long phone) throws DatabaseException, SQLException {
-		String[] fullName = name.split(" ");
-		String sql = "Update contact_table set phone = ? where fname = ? and lname = ?";
+		String sql = "Update contact_table set phone = ? where fname = ?";
 		int result = 0;
 		if (this.contactStatement == null) {
 			Connection connection = this.getConnection();
@@ -87,8 +96,7 @@ public class AddressBookDB {
 		}
 		try {
 			contactStatement.setLong(1, phone);
-			contactStatement.setString(2, fullName[0]);
-			contactStatement.setString(3, fullName[1]);
+			contactStatement.setString(2, name);
 			result = contactStatement.executeUpdate();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -113,9 +121,7 @@ public class AddressBookDB {
 	}
 
 	public List<Contact> getContactFromData(String name) throws DatabaseException {
-		String[] fullName = name.split(" ");
-		String sql = String.format("SELECT * FROM contact_table WHERE fname = '%s' and lname = '%s'", fullName[0],
-				fullName[1]);
+		String sql = String.format("SELECT * FROM contact_table WHERE fname = '%s'", name);
 		List<Contact> contactList = new ArrayList<>();
 		try (Connection connection = this.getConnection()) {
 			Statement statement = connection.createStatement();
@@ -128,7 +134,8 @@ public class AddressBookDB {
 	}
 
 	/**
-	 * Usecase18: retrieving data between the data range
+	 * Usecase18: retrieving data between the data range Refactored the query
+	 * according to new table structure
 	 * 
 	 * @param start
 	 * @param end
@@ -137,9 +144,8 @@ public class AddressBookDB {
 	 */
 	public List<Contact> getContactForDateRange(LocalDate start, LocalDate end) throws DatabaseException {
 		String sql = String.format(
-				"select contact_table.contact_id, contact_table.fname,contact_table.lname,contact_table.address,contact_table.zip, contact_table.city, contact_table.state, "
-						+ "contact_table.phone,contact_table.email,contact_table.date, addressBook.addName, addressBook.type from contact_table "
-						+ "inner join addressBook on contact_table.contact_id = addressBook.contact_id where date between '%s' and '%s'",
+				"select * from contact_table inner join addressbookjoin using (contact_id) inner join addressbook "
+						+ "using(add_id) where date between '%s' and '%s'",
 				Date.valueOf(start), Date.valueOf(end));
 		return this.getContactData(sql);
 	}
@@ -159,7 +165,8 @@ public class AddressBookDB {
 	}
 
 	/**
-	 * Usecase20: Inserting data into the tables in a single transaction
+	 * Usecase20: Inserting data into the tables in a single transaction Refactored
+	 * the query according to new table structure
 	 * 
 	 * @param fname
 	 * @param lname
@@ -173,12 +180,11 @@ public class AddressBookDB {
 	 * @param addName
 	 * @param type
 	 * @return
-	 * @throws com.capgemini.addressbookdb.DatabaseException
+	 * @throws DatabaseException
 	 * @throws SQLException
 	 */
 	public Contact addContact(String fname, String lname, String address, long zip, String city, String state,
-			long phone, String email, LocalDate date, int addId, String addName, String type)
-			throws DatabaseException, SQLException {
+			long phone, String email, LocalDate date, int addId) throws DatabaseException, SQLException {
 		int contactId = -1;
 		Connection connection = null;
 		Contact contact = null;
@@ -208,12 +214,11 @@ public class AddressBookDB {
 			throw new DatabaseException("Unable to add new contact");
 		}
 		try (Statement statement = connection.createStatement()) {
-			String sql = String.format(
-					"INSERT INTO addressBook (id,contact_id,addName,type) " + "VALUES ('%s','%s','%s','%s')", addId,
-					contactId, addName, type);
+			String sql = String.format("INSERT INTO addressbookjoin (contact_id, add_id) " + "VALUES ('%s','%s')",
+					contactId, addId);
 			int rowAffected = statement.executeUpdate(sql);
 			if (rowAffected == 1) {
-				contact = new Contact(fname, lname, address, city, state, zip, phone, email);
+				contact = new Contact(contactId, fname, lname, address, city, state, zip, phone, email, date);
 			}
 		} catch (SQLException e) {
 			try {

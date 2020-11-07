@@ -13,9 +13,8 @@ public class Contact {
 	public long phoneNumber;
 	public String email;
 	public int addId;
-	public String addName;
 	public LocalDate date;
-	public String type;
+	public int id;
 
 	public Contact(String firstName, String lastName, String address, String city, String state, long zip,
 			long phoneNumber, String email) {
@@ -30,19 +29,18 @@ public class Contact {
 	}
 
 	public Contact(String firstName, String lastName, String address, String city, String state, long zip,
-			long phoneNumber, String email, LocalDate date, int addressBookId, String addName, String type) {
-		this.firstName = firstName;
-		this.lastName = lastName;
-		this.address = address;
-		this.city = city;
-		this.state = state;
-		this.zip = zip;
-		this.phoneNumber = phoneNumber;
-		this.email = email;
+			long phoneNumber, String email, LocalDate date, int add_id) {
+		this(firstName, lastName, address, city, state, zip, phoneNumber, email);
 		this.date = date;
-		this.addId = addressBookId;
-		this.addName = addName;
-		this.type = type;
+		this.addId = add_id;
+
+	}
+
+	public Contact(int id, String firstName, String lastName, String address, String city, String state, long zip,
+			long phoneNumber, String email, LocalDate date) {
+		this(firstName, lastName, address, city, state, zip, phoneNumber, email);
+		this.id = id;
+		this.date = date;
 	}
 
 	@Override

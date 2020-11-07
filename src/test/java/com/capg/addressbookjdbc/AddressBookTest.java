@@ -11,11 +11,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import com.capg.addressbook.AddressBookService;
 import com.capg.addressbook.AddressBookService.IOService;
 import com.capg.addressbook.Contact;
+import com.google.gson.Gson;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
 
 public class AddressBookTest {
 
@@ -58,8 +63,8 @@ public class AddressBookTest {
 		AddressBookService addressBookService = new AddressBookService();
 		addressBookService.readContactData(IOService.DB_IO);
 		addressBookService.addContactInDatabase("Mukesh", "Ambani", "Ichalkaranji", 416115L, "Kolhapur", "Maharashtra",
-				9856743210L, "mukesh@gmail.com", LocalDate.of(2021, 01, 02), 1, "AddressBook1", "family");
-		boolean result = addressBookService.checkContactDataSync("Aniket");
+				9856743210L, "mukesh@gmail.com", LocalDate.of(2021, 01, 02), 1);
+		boolean result = addressBookService.checkContactDataSync("Mukesh");
 		assertEquals(true, result);
 	}
 
@@ -67,9 +72,9 @@ public class AddressBookTest {
 	public void geiven2Contacts_WhenAddedToDB_ShouldMatchContactEntries() throws DatabaseException {
 		Contact[] contactArray = {
 				new Contact("Jeff", "Bezos", "Ichalkaranji", "Kolhapur", "Maharashtra", 416115L, 9850273350L,
-						"jeff@gmail.com", LocalDate.of(2021, 01, 02), 2, "AddressBook2", "friend"),
+						"jeff@gmail.com", LocalDate.of(2021, 01, 02), 2),
 				new Contact("Elon", "Musk", "Ichalkaranji", "Kolhapur", "Maharashtra", 416115L, 9887483853L,
-						"elon@gmail.com", LocalDate.of(2021, 01, 01), 2, "AddressBook2", "friend") };
+						"elon@gmail.com", LocalDate.of(2021, 01, 01), 2) };
 		AddressBookService addressBookService = new AddressBookService();
 		addressBookService.readContactData(IOService.DB_IO);
 		Instant start = Instant.now();
@@ -91,7 +96,29 @@ public class AddressBookTest {
 		addressBookService.updatePhoneNumber(contactMap);
 		Instant end = Instant.now();
 		System.out.println("Duration with Thread: " + Duration.between(start, end));
-		boolean result = addressBookService.checkContactInSyncWithDB(Arrays.asList("Aniket Sarap"));
+		boolean result = addressBookService.checkContactInSyncWithDB(Arrays.asList("Mukesh Ambani"));
 		assertEquals(true, result);
+	}
+
+	@Before
+	public void setup() {
+		RestAssured.baseURI = "http://localhost";
+		RestAssured.port = 3000;
+	}
+
+	private Contact[] getContactList() {
+		Response response = RestAssured.get("/contact");
+		System.out.println("Employee payroll entries in JSONServer:\n" + response.asString());
+		Contact[] arrayOfContact = new Gson().fromJson(response.asString(), Contact[].class);
+		return arrayOfContact;
+	}
+
+	@Test
+	public void givenEmployeeDataInJSONServer_WhenRetrieved_ShouldMatchTheCount() {
+		Contact[] arrayOfContact = getContactList();
+		AddressBookService addressBookService = new AddressBookService(Arrays.asList(arrayOfContact));
+		long entries = addressBookService.countEntries(IOService.REST_IO);
+		assertEquals(1, entries);
+
 	}
 }

@@ -1,0 +1,20 @@
+{
+"contact": [
+        {  
+        "id" : 1,
+      "fname": "Mukesh",
+      "lname":"Ambani",
+      "address": "Ichalkaranji",
+      "zip": 416115,
+      "city": "Kolhapur",
+      "state":"Maharashtra",
+      "phone":9856743210,
+      "email":"mukesh@gmail.com",
+      "start": {
+        "year": 2021,
+        "month": 1,
+        "day": 2
+            }
+        }
+    ]
+}
